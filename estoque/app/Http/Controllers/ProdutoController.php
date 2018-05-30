@@ -1,25 +1,35 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace estoque\Http\Controllers;
 
-use Request;
+use Validator;
 use Illuminate\Support\Facades\DB;
+use estoque\Produto;
+use Request;
 
 class ProdutoController extends Controller
 {
     public function lista()
     {
-
-        $produtos = DB::select('select * from produtos');
-
+        $produtos = Produto::all();
         return view('listagem')->with('produtos', $produtos);
     }
 
-    public function mostra()
+    public function mostra($id)
     {
-        $id = Request::route('id');
-        $produto = DB::select('select * from produtos where id = ?', [$id]);
-        return view('detalhes')->with('p', $produto[0]);
+        $produto = Produto::find($id);
+        return view('detalhes')->with('p', $produto);
+    }
+
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function remove($id)
+    {
+        $produto = Produto::find($id);
+        $produto->delete();
+
+        return redirect()->action('ProdutoController@lista');
     }
 
     public function novo()
@@ -29,14 +39,19 @@ class ProdutoController extends Controller
 
     public function adiciona()
     {
+        $validator = Validator::make(
+          ['nome' => Request::input('nome')],
+          ['nome' => 'required|min:3']
+        );
 
-        $nome = Request::input('nome');
-        $valor = Request::input('valor');
-        $quantidade = Request::input('quantidade');
-        $descricao = Request::input('descricao');
+        if($validator->fails())
+        {
+            $validator->messages();
+            return redirect('/produtos/novo');
+        }
 
-        DB::insert('insert into produtos (nome, valor, quantidade, descricao) values (?,?,?,?)', array($nome, $valor, $quantidade, $descricao));
-
-        return view('adicionado')->with('nome', $nome);
+        Produto::create(Request::all());
+        return redirect('/produtos')->withInput();
     }
+
 }
