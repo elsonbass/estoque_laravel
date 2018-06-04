@@ -17,7 +17,8 @@
             <td>DESCRIÇÃO</td>
             <td>QUANTIDADE</td>
             <td>TAMANHO</td>
-            <td>STATUS</td>
+            <td>CATEGORIA_ID</td>
+            <td>AÇÃO</td>
         </thead>
         <tbody>
             @foreach($produtos as $p)
@@ -27,6 +28,7 @@
                     <td>{{ $p->descricao }}</td>
                     <td>{{ $p->quantidade }}</td>
                     <td>{{ $p->tamanho }}</td>
+                    <td>{{ $p->categoria_id->nome }}</td>
                     <td>
                         <a href="/produtos/mostra/{{$p->id}}">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>

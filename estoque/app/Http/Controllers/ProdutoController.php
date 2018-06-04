@@ -2,13 +2,21 @@
 
 namespace estoque\Http\Controllers;
 
+use estoque\Categoria;
+use estoque\Http\Requests\ProdutoRequest;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use estoque\Produto;
 use Request;
+use Auth;
 
 class ProdutoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('autorizador');
+    }
+
     public function lista()
     {
         $produtos = Produto::all();
@@ -21,9 +29,6 @@ class ProdutoController extends Controller
         return view('detalhes')->with('p', $produto);
     }
 
-    /**
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
     public function remove($id)
     {
         $produto = Produto::find($id);
@@ -34,24 +39,12 @@ class ProdutoController extends Controller
 
     public function novo()
     {
-        return view('formulario');
+        return view('formulario')->with('categorias', Categoria::all());
     }
 
-    public function adiciona()
+    public function adiciona(ProdutoRequest $request)
     {
-        $validator = Validator::make(
-          ['nome' => Request::input('nome')],
-          ['nome' => 'required|min:3']
-        );
-
-        if($validator->fails())
-        {
-            $validator->messages();
-            return redirect('/produtos/novo');
-        }
-
-        Produto::create(Request::all());
+        Produto::create($request->all());
         return redirect('/produtos')->withInput();
     }
-
 }
